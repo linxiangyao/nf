@@ -20,16 +20,15 @@ public:
 
 		m_packer = nullptr;
 		m_network = nullptr;
-		m_callback = nullptr;
 		m_send_pack_id = 0;
 		m_send_pack_seq = 0;
 		m_send_body = nullptr;
 		m_send_body_len = 0;
 	}
 
-	ClientCgi::SendPack* newSendPackAndPack() const
+	ClientNetwork::SendPack* newSendPackAndPack() const
 	{
-		ClientCgi::SendPack* send_pack = m_network->newSendPack(m_send_pack_id, m_send_cmd_type, m_send_pack_seq);
+		ClientNetwork::SendPack* send_pack = m_network->newSendPack(m_send_pack_id, m_send_cmd_type, m_send_pack_seq);
 
 		Binary* whole_pack_bin = &(send_pack->m_send_whole_pack_bin);
 		StPacker::Pack p;
@@ -50,7 +49,6 @@ public:
 	StPacker* m_packer;
 	ClientNetwork* m_network;
 
-	ClientCgi::ICallback* m_callback;
 	uint64_t m_send_pack_id;
 	uint32_t m_send_pack_seq;
 	uint32_t m_send_cmd_type;
@@ -77,14 +75,12 @@ protected:
 		builder.m_send_cmd_type = getCgiInfo().m_send_cmd_type;
 		builder.m_send_body = (const byte_t*)m_c2s_req_body.c_str();
 		builder.m_send_body_len = m_c2s_req_body.size() + 1;
-		ClientCgi::SendPack* send_pack = builder.newSendPackAndPack();
+		ClientNetwork::SendPack* send_pack = builder.newSendPackAndPack();
 
 		setSendPack(send_pack);
-		setCallback(builder.m_callback);
 		return true;
 	}
 };
-
 
 
 class __ClientCgi_RedEnvelope_giverCreateSession : public __ClientCgi_RedEnvelope_base
@@ -116,7 +112,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -154,7 +150,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -193,7 +189,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -237,7 +233,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -285,7 +281,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -323,7 +319,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -364,7 +360,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -405,7 +401,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -449,7 +445,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_resp_body = (const char*)st_pack->m_body.getData();
 		m_s2c_resp_err_code = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_resp_body, "err_code=", ","));
@@ -491,7 +487,7 @@ public:
 private:
 	virtual void onSetRecvPackEnd()
 	{
-		RecvPack* recv_pack = getRecvPack();
+		ClientNetwork::RecvPack* recv_pack = getRecvPack();
 		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
 		m_s2c_push_body = (const char*)st_pack->m_body.getData();
 		m_s2c_push_wx_re_id = StringUtil::fetchMiddle(m_s2c_push_body, "wx_re_id=", ",");

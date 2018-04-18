@@ -264,7 +264,6 @@ private:
 
 	virtual void onMsg_startCmd_end(Message* msg) override
 	{
-		m_cgi_ctx.m_callback = this;
 		m_cgi_ctx.m_network = getNetwork();
 		m_cgi_ctx.m_packer = getPacker();
 	}
@@ -274,9 +273,9 @@ private:
 		ClientNetworkMsgLooperHandler::onMessageTimerTick(timer_id, user_data);
 	}
 
-	virtual void onClientCgi_cgiDone(ClientCgi * cgi) override
+	virtual void onClientNetwork_cgiDone(ClientNetwork* network, ClientCgi * cgi) override
 	{
-		ClientNetworkMsgLooperHandler::onClientCgi_cgiDone(cgi);
+		ClientNetworkMsgLooperHandler::onClientNetwork_cgiDone(network, cgi);
 		slog_d("cgi done\n");
 
 		switch (cgi->getCgiInfo().m_send_cmd_type)
@@ -316,7 +315,7 @@ private:
 		delete cgi;
 	}
 
-	virtual void onClientCgiMgr_recvS2cPushPack(std::unique_ptr<ClientNetwork::RecvPack>* recv_pack) override
+	virtual void onClientNetwork_recvS2cPushPack(ClientNetwork* network, std::unique_ptr<ClientNetwork::RecvPack>* recv_pack) override
 	{
 		ClientNetwork::RecvPack* p = recv_pack->get();
 		if (p->m_recv_cmd_type == __ECgiCmdType_s2cPush_RedEnvelope_MatchResult)
@@ -329,7 +328,7 @@ private:
 		}
 	}
 
-	virtual void onClientCgiMgr_recvS2cReqPack(std::unique_ptr<ClientNetwork::RecvPack>* recv_pack) override
+	virtual void onClientNetwork_recvS2cReqPack(ClientNetwork* network, std::unique_ptr<ClientNetwork::RecvPack>* recv_pack) override
 	{
 		slog_d("recv s2c_req pack\n");
 	}
@@ -523,7 +522,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -543,7 +542,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -563,7 +562,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -583,7 +582,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -603,7 +602,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -623,7 +622,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -643,7 +642,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -663,7 +662,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
@@ -683,7 +682,7 @@ private:
 		}
 		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to startCgi");
 			return;
