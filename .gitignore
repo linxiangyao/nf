@@ -1,3 +1,10 @@
+/scp.bat
+
+/project/win/nf/.vs
+/project/win/nf/x64
 /project/win/nf/scpdb.bat
 /project/win/nf/scplog.bat
-/scp.bat
+
+/project/win/nf/nfClient/x64
+
+/project/win/nf/nfServer/x64
