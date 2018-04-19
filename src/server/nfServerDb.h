@@ -1,5 +1,6 @@
 #ifndef _NF_SERVER_DB_H_
 #define _NF_SERVER_DB_H_
+#include <set>
 #include "nfComm.h"
 USING_NAMESPACE_S
 

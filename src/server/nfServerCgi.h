@@ -15,9 +15,9 @@ public:
 		m_network = nullptr;
 	}
 
-	ServerCgi::SendPack* newSendPackAndPack(uint32_t send_cmd_type, uint32_t send_seq, const byte_t* send_body, size_t send_body_len) const
+	ServerNetwork::SendPack* newSendPackAndPack(uint32_t send_cmd_type, uint32_t send_seq, const byte_t* send_body, size_t send_body_len) const
 	{
-		ServerCgi::SendPack* send_pack = m_network->newSendPack(m_sid, m_ssid, send_cmd_type, send_seq);
+		ServerNetwork::SendPack* send_pack = m_network->newSendPack(m_sid, m_ssid, send_cmd_type, send_seq);
 
 		Binary* whole_pack_bin = &(send_pack->m_send_whole_pack_bin);
 		StPacker::Pack p;
@@ -38,7 +38,6 @@ public:
 	uint32_t m_uin;
 	StPacker* m_packer;
 	ServerNetwork* m_network;
-	ServerCgi::ICallback* m_callback;
 };
 
 
@@ -67,9 +66,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_giver_create_session: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -115,9 +113,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_giver_delete_session: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -158,9 +155,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_giver_update_session: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -204,9 +200,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_giver_report_scan: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -265,9 +260,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_receiver_create_session: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -307,9 +301,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_receiver_delete_session: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -348,9 +341,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_receiver_update_session: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -396,9 +388,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_receiver_report_scan: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -448,9 +439,8 @@ public:
 	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
 	{
 		m_s2cResp_body = std::string() + "re_report_statistic_zisi: err_code=" + StringUtil::toString(err_code) + ",";
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 		return true;
 	}
 
@@ -511,9 +501,8 @@ public:
 		{
 			m_s2c_push_body = m_s2c_push_body + "receiver_uin" + StringUtil::toString(i + 1) + "=" + StringUtil::toString(receiver_uins[i]) + ",";
 		}
-		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, 0, (const byte_t*)m_s2c_push_body.c_str(), m_s2c_push_body.size() + 1);
+		ServerNetwork::SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, 0, (const byte_t*)m_s2c_push_body.c_str(), m_s2c_push_body.size() + 1);
 		setSendPack(send_pack);
-		setCallback(cgi_ctx.m_callback);
 	}
 
 

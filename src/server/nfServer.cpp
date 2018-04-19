@@ -257,26 +257,13 @@ private:
 			delete_and_erase_map_elements_by_keys(&m_receiver_sessions, timeout_receiver_uins);
 		}
 	}
-
-	virtual void onServerCgiMgr_sessionCreated(socket_id_t sid, session_id_t ssid) override
+	
+	virtual void onServerNetwork_recvC2sReqPack(ServerNetwork* network, std::unique_ptr<ServerNetwork::RecvPack>* recv_pack) override
 	{
-		ServerNetworkMsgLooperHandler::onServerCgiMgr_sessionCreated(sid, ssid);
-		slog_d("create session, sid=%0, ssid=%1", sid, ssid.toString().c_str());
-	}
+		ServerNetworkMsgLooperHandler::onServerNetwork_recvC2sReqPack(network, recv_pack);
 
-	virtual void onServerCgiMgr_sessionClosed(socket_id_t sid, session_id_t ssid) override
-	{
-		ServerNetworkMsgLooperHandler::onServerCgiMgr_sessionClosed(sid, ssid);
-		slog_d("close session, sid=%0, ssid=%1", sid, ssid.toString().c_str());
-	}
-
-	virtual void onServerCgiMgr_recvC2sReqPack(std::unique_ptr<ServerCgi::RecvPack>* recv_pack) override
-	{
-		ServerNetworkMsgLooperHandler::onServerCgiMgr_recvC2sReqPack(recv_pack);
-
-		ServerCgi::RecvPack* p = recv_pack->get();
+		ServerNetwork::RecvPack* p = recv_pack->get();
 		__ServerCgiCtx cgi_ctx;
-		cgi_ctx.m_callback = this;
 		cgi_ctx.m_network = getNetwork();
 		cgi_ctx.m_packer = m_packer;
 		cgi_ctx.m_uin = 0;
@@ -329,9 +316,9 @@ private:
 		}
 	}
 	
-	virtual void onServerCgi_cgiDone(ServerCgi* cgi) override
+	virtual void onServerNetwork_cgiDone(ServerNetwork* network, ServerCgi* cgi) override
 	{
-		ServerNetworkMsgLooperHandler::onServerCgi_cgiDone(cgi);
+		ServerNetworkMsgLooperHandler::onServerNetwork_cgiDone(network, cgi);
 
 		if (cgi->getSendPack() != NULL && __getCgiInfoIndexBySendCmdType(cgi->getSendPack()->m_send_cmd_type) >= 0)
 		{
@@ -348,7 +335,7 @@ private:
 		delete cgi;
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverCreateSession(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverCreateSession(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_giverCreateSession* cgi = new __ServerCgi_RedEnvelope_giverCreateSession();
 		cgi->setRecvPack(recv_pack->release());
@@ -405,13 +392,13 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverDeleteSession(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverDeleteSession(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_giverCreateSession* cgi = new __ServerCgi_RedEnvelope_giverCreateSession();
 		cgi->setRecvPack(recv_pack->release());
@@ -426,13 +413,13 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverUpdateSession(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverUpdateSession(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_giverUpdateSession* cgi = new __ServerCgi_RedEnvelope_giverUpdateSession();
 		cgi->setRecvPack(recv_pack->release());
@@ -464,7 +451,7 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
@@ -476,7 +463,7 @@ private:
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverReportScanResult(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_giverReportScanResult(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_giverReportScanResult* cgi = new __ServerCgi_RedEnvelope_giverReportScanResult();
 		cgi->setRecvPack(recv_pack->release());
@@ -532,7 +519,7 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
@@ -544,7 +531,7 @@ private:
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverCreateSession(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverCreateSession(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_receiverCreateSession* cgi = new __ServerCgi_RedEnvelope_receiverCreateSession();
 		cgi->setRecvPack(recv_pack->release());
@@ -574,13 +561,13 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverDeleteSession(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverDeleteSession(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_receiverDeleteSession* cgi = new __ServerCgi_RedEnvelope_receiverDeleteSession();
 		cgi->setRecvPack(recv_pack->release());
@@ -595,13 +582,13 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverUpdateSession(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverUpdateSession(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_receiverUpdateSession* cgi = new __ServerCgi_RedEnvelope_receiverUpdateSession();
 		cgi->setRecvPack(recv_pack->release());
@@ -636,13 +623,13 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverReportScanResult(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_receiverReportScanResult(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_receiverReportScanResult* cgi = new __ServerCgi_RedEnvelope_receiverReportScanResult();
 		cgi->setRecvPack(recv_pack->release());
@@ -693,7 +680,7 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
@@ -705,7 +692,7 @@ private:
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_reportStatisticZishi(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_RedEnvelope_reportStatisticZishi(std::unique_ptr<ServerNetwork::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
 	{
 		__ServerCgi_RedEnvelope_reportStatisticZishi* cgi = new __ServerCgi_RedEnvelope_reportStatisticZishi();
 		cgi->setRecvPack(recv_pack->release());
@@ -729,7 +716,7 @@ private:
 
 		cgi->initSendPack(cgi_ctx, err_code);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
@@ -830,7 +817,7 @@ private:
 	{
 		slog_i("push= %0", cgi->m_s2c_push_body.c_str());
 
-		if (!getCgiMgr()->startCgi(cgi))
+		if (!getNetwork()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
@@ -906,7 +893,6 @@ private:
 	__ServerCgiCtx __genServerCgiCtx(socket_id_t sid, session_id_t ssid)
 	{
 		__ServerCgiCtx cgi_ctx;
-		cgi_ctx.m_callback = this;
 		cgi_ctx.m_network = getNetwork();
 		cgi_ctx.m_packer = m_packer;
 		cgi_ctx.m_sid = sid;
@@ -1191,16 +1177,4 @@ int main(int argc, char** argv)
     return 0;
 }
 
-
-
-//
-//
-//
-//virtual void onServerCgiMgr_recvC2sNotifyPack(std::unique_ptr<ServerCgi::RecvPack>* recv_pack) override
-//{
-//	ServerNetworkMsgLooperHandler::onServerCgiMgr_recvC2sNotifyPack(recv_pack);
-//	ServerCgi::RecvPack* p = recv_pack->get();
-//	StPacker::Pack* st_pack = (StPacker::Pack*)p->m_recv_ext;
-//	slog_i("recv unkonw c2s_notify pack");
-//}
 
