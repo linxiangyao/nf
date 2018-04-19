@@ -255,6 +255,16 @@ private:
 		m_api->getMessageLooper().postMessage(msg);
 	}
 
+	virtual void onNfClient_recvResp_AddFriend_reportUserInfo(uint64_t cgi_id, int err_code) override
+	{
+
+	}
+
+	virtual void onNfClient_recvResp_AddFriend_queryUserInfo(uint64_t cgi_id, int err_code, uint32_t uin, const std::string& user_name) override
+	{
+
+	}
+
 	void __onMsg_recvResp_RedEnvelope_giverCreateSession(Message* msg)
 	{
 
@@ -339,6 +349,10 @@ private:
 		}
 
 		m_client->sendReq_RedEnvelope_reportStatistic_Zisi(1024, true, 180, 100, 200, -300);
+		m_client->sendReq_AddFriend_reportUserInfo(1, "ryan");
+		m_client->sendReq_AddFriend_reportUserInfo(2, "lin");
+		m_client->sendReq_AddFriend_queryUserInfo(1);
+		m_client->sendReq_AddFriend_queryUserInfo(2);
 	}
 
 	void __postMsgToSelf(__EMsgType msg_type, uint64_t cgi_id, int err_code)

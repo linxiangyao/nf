@@ -32,6 +32,9 @@ public:
 		m_cgi_infos.push_back(__ServerCgi_RedEnvelope_receiverReportScanResult::s_getServerCgiInfo());
 		m_cgi_infos.push_back(__ServerCgi_RedEnvelope_reportStatisticZishi::s_getServerCgiInfo());
 		m_cgi_infos.push_back(__ServerCgi_redEnvelopeMatchResult::s_getServerCgiInfo());
+		m_cgi_infos.push_back(__ServerCgi_AddFriend_reportUserInfo::s_getServerCgiInfo());
+		m_cgi_infos.push_back(__ServerCgi_AddFriend_queryUserInfo::s_getServerCgiInfo());
+
 		m_packer = new StPacker();
 
 		return ServerNetworkMsgLooperHandler::init(looper, "0.0.0.0", 12306, m_cgi_infos, m_packer);
@@ -283,6 +286,7 @@ private:
 		cgi_ctx.m_sid = p->m_sid;
 		cgi_ctx.m_ssid = p->m_ssid;
 
+		// re --
 		// giver
 		if (p->m_recv_cmd_type == __ECgiCmdType_c2sReq_RedEnvelope_GiverCreateSession)
 		{
@@ -323,6 +327,15 @@ private:
 			__onServerCgiMgr_recvC2sReqPack_RedEnvelope_reportStatisticZishi(recv_pack, cgi_ctx);
 		}
 
+		// add friend --
+		else if (p->m_recv_cmd_type == __ECgiCmdType_c2sReq_AddFriend_ReportUserInfo)
+		{
+			__onServerCgiMgr_recvC2sReqPack_AddFriend_reportUserInfo(recv_pack, cgi_ctx);
+		}
+		else if (p->m_recv_cmd_type == __ECgiCmdType_c2sReq_AddFriend_QueryUserInfo)
+		{
+			__onServerCgiMgr_recvC2sReqPack_AddFriend_queryUserInfo(recv_pack, cgi_ctx);
+		}
 		else
 		{
 			slog_e("recv unkonw c2s_req pack\n");
@@ -736,6 +749,57 @@ private:
 	}
 
 
+	class __AddFriendCtx
+	{
+	public:
+		std::map < uint32_t, std::string> m_uin_to_user_name;
+	};
+	__AddFriendCtx m_add_friend_ctx;
+
+	void __onServerCgiMgr_recvC2sReqPack_AddFriend_reportUserInfo(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	{
+		__ServerCgi_AddFriend_reportUserInfo* cgi = new __ServerCgi_AddFriend_reportUserInfo();
+		cgi->setRecvPack(recv_pack->release());
+		slog_i("req = seq:%0, %1", cgi->getRecvPack()->m_recv_seq, cgi->m_c2sReq_body.c_str());
+
+		uint32_t err_code = 0;
+		{
+			m_add_friend_ctx.m_uin_to_user_name[cgi->m_c2sReq_uin] = cgi->m_c2sReq_user_name;
+		}
+
+		cgi->initSendPack(cgi_ctx, err_code);
+		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
+		if (!getCgiMgr()->startCgi(cgi))
+		{
+			slog_e("fail to start cgi");
+		}
+	}
+
+	void __onServerCgiMgr_recvC2sReqPack_AddFriend_queryUserInfo(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	{
+		__ServerCgi_AddFriend_queryUserInfo* cgi = new __ServerCgi_AddFriend_queryUserInfo();
+		cgi->setRecvPack(recv_pack->release());
+		slog_i("req = seq:%0, %1", cgi->getRecvPack()->m_recv_seq, cgi->m_c2sReq_body.c_str());
+
+		uint32_t err_code = 0;
+		uint32_t uin = 0;
+		std::string user_name;
+		{
+			auto it = m_add_friend_ctx.m_uin_to_user_name.find(cgi->m_c2sReq_uin);
+			if (it != m_add_friend_ctx.m_uin_to_user_name.end())
+			{
+				uin = cgi->m_c2sReq_uin;
+				user_name = it->second;
+			}
+		}
+
+		cgi->initSendPack(cgi_ctx, err_code, uin, user_name);
+		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
+		if (!getCgiMgr()->startCgi(cgi))
+		{
+			slog_e("fail to start cgi");
+		}
+	}
 
 
 
@@ -1190,17 +1254,4 @@ int main(int argc, char** argv)
 	delete t;
     return 0;
 }
-
-
-
-//
-//
-//
-//virtual void onServerCgiMgr_recvC2sNotifyPack(std::unique_ptr<ServerCgi::RecvPack>* recv_pack) override
-//{
-//	ServerNetworkMsgLooperHandler::onServerCgiMgr_recvC2sNotifyPack(recv_pack);
-//	ServerCgi::RecvPack* p = recv_pack->get();
-//	StPacker::Pack* st_pack = (StPacker::Pack*)p->m_recv_ext;
-//	slog_i("recv unkonw c2s_notify pack");
-//}
 

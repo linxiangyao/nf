@@ -240,15 +240,6 @@ ServerCgiInfo __ServerCgi_RedEnvelope_giverReportScanResult::s_cgi_info;
 
 
 
-
-
-
-
-
-
-
-
-
 class __ServerCgi_RedEnvelope_receiverCreateSession : public ServerCgi
 {
 public:
@@ -429,9 +420,6 @@ ServerCgiInfo __ServerCgi_RedEnvelope_receiverReportScanResult::s_cgi_info;
 
 
 
-
-
-
 class __ServerCgi_RedEnvelope_reportStatisticZishi : public ServerCgi
 {
 public:
@@ -482,12 +470,6 @@ private:
 ServerCgiInfo __ServerCgi_RedEnvelope_reportStatisticZishi::s_cgi_info;
 
 
-
-
-
-
-
-
 class __ServerCgi_redEnvelopeMatchResult : public ServerCgi
 {
 public:
@@ -527,6 +509,96 @@ ServerCgiInfo __ServerCgi_redEnvelopeMatchResult::s_cgi_info;
 
 
 
+
+
+
+class __ServerCgi_AddFriend_reportUserInfo : public ServerCgi
+{
+public:
+	static const ServerCgiInfo & s_getServerCgiInfo()
+	{
+		s_cgi_info.m_cgi_type = EServerCgiType_c2sReq_s2cResp;
+		s_cgi_info.m_recv_cmd_type = __ECgiCmdType_c2sReq_AddFriend_ReportUserInfo;
+		s_cgi_info.m_send_cmd_type = __ECgiCmdType_s2cResp_AddFriend_ReportUserInfo;
+		return s_cgi_info;
+	}
+
+	virtual const ServerCgiInfo& getServerCgiInfo() const override { return s_getServerCgiInfo(); }
+
+	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code)
+	{
+		m_s2cResp_body = std::string() + "af_report_user_info: err_code=" + StringUtil::toString(err_code) + ",";
+		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		setSendPack(send_pack);
+		setCallback(cgi_ctx.m_callback);
+		return true;
+	}
+
+	std::string m_c2sReq_body;
+	uint32_t m_c2sReq_uin;
+	std::string m_c2sReq_user_name;
+
+	std::string m_s2cResp_body;
+
+
+private:
+	virtual void onSetRecvPackEnd() override
+	{
+		StPacker::Pack* st_pack = (StPacker::Pack*)(getRecvPack()->m_recv_ext);
+		m_c2sReq_body = (const char*)st_pack->m_body.getData();
+		m_c2sReq_uin = StringUtil::parseUint(StringUtil::fetchMiddle(m_c2sReq_body, "uin=", ","));
+		m_c2sReq_user_name = StringUtil::fetchMiddle(m_c2sReq_body, "user_name=", ",");
+	}
+
+	static ServerCgiInfo s_cgi_info;
+};
+ServerCgiInfo __ServerCgi_AddFriend_reportUserInfo::s_cgi_info;
+
+
+
+
+class __ServerCgi_AddFriend_queryUserInfo : public ServerCgi
+{
+public:
+	static const ServerCgiInfo & s_getServerCgiInfo()
+	{
+		s_cgi_info.m_cgi_type = EServerCgiType_c2sReq_s2cResp;
+		s_cgi_info.m_recv_cmd_type = __ECgiCmdType_c2sReq_AddFriend_QueryUserInfo;
+		s_cgi_info.m_send_cmd_type = __ECgiCmdType_s2cResp_AddFriend_QueryUserInfo;
+		return s_cgi_info;
+	}
+
+	virtual const ServerCgiInfo& getServerCgiInfo() const override { return s_getServerCgiInfo(); }
+
+	bool initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t err_code, uint32_t uin, const std::string& user_name)
+	{
+		m_s2cResp_body = std::string() + "af_query_user_info: err_code=" + StringUtil::toString(err_code) + ", "
+			+ "uin=" + StringUtil::toString(uin) + ", "
+			+ "user_name=" + user_name + ", "
+			;
+		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, getRecvPack()->m_recv_seq, (const byte_t*)m_s2cResp_body.c_str(), m_s2cResp_body.size() + 1);
+		setSendPack(send_pack);
+		setCallback(cgi_ctx.m_callback);
+		return true;
+	}
+
+	std::string m_c2sReq_body;
+	uint32_t m_c2sReq_uin;
+
+	std::string m_s2cResp_body;
+
+
+private:
+	virtual void onSetRecvPackEnd() override
+	{
+		StPacker::Pack* st_pack = (StPacker::Pack*)(getRecvPack()->m_recv_ext);
+		m_c2sReq_body = (const char*)st_pack->m_body.getData();
+		m_c2sReq_uin = StringUtil::parseUint(StringUtil::fetchMiddle(m_c2sReq_body, "uin=", ","));
+	}
+
+	static ServerCgiInfo s_cgi_info;
+};
+ServerCgiInfo __ServerCgi_AddFriend_queryUserInfo::s_cgi_info;
 
 
 

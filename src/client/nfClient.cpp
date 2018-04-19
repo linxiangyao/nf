@@ -8,6 +8,8 @@ ClientCgiInfo __ClientCgi_RedEnvelope_receiverDeleteSession::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_receiverUpdateSession::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_receiverReportScanResult::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_reportStatisticZishi::s_cgi_info;
+ClientCgiInfo __ClientCgi_AddFriend_reportUserInfo::s_cgi_info;
+ClientCgiInfo __ClientCgi_AddFriend_queryUserInfo::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_matchResult::s_cgi_info;
 
 
@@ -23,6 +25,8 @@ std::map<uint32_t, ClientCgiInfo> __getCgiInfoMap()
 	cgi_infos[__ClientCgi_RedEnvelope_receiverUpdateSession::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_receiverUpdateSession::s_getCgiInfo();
 	cgi_infos[__ClientCgi_RedEnvelope_receiverReportScanResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_receiverReportScanResult::s_getCgiInfo();
 	cgi_infos[__ClientCgi_RedEnvelope_reportStatisticZishi::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_reportStatisticZishi::s_getCgiInfo();
+	cgi_infos[__ClientCgi_AddFriend_reportUserInfo::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_reportUserInfo::s_getCgiInfo();
+	cgi_infos[__ClientCgi_AddFriend_queryUserInfo::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_queryUserInfo::s_getCgiInfo();
 	cgi_infos[__ClientCgi_RedEnvelope_matchResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_matchResult::s_getCgiInfo();
 	return cgi_infos;
 }
@@ -37,110 +41,102 @@ std::map<uint32_t, ClientCgiInfo> __getCgiInfoMap()
 #define __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverUpdateSession 9126187
 #define __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverReportScanResult 9126188
 #define __MSG_TYPE_NfClient_sendReq_RedEnvelope_reportStatistic_zisi 9126189
+#define __MSG_TYPE_NfClient_sendReq_AddFriend_reportUserInfo 9126211
+#define __MSG_TYPE_NfClient_sendReq_AddFriend_queryUserInfo 9126212
 
 
 
-
-class __Msg_sendReq_RedEnvelope_giverCreateSession : public Message
+class __Msg_sendReq : public Message
 {
 public:
-	__Msg_sendReq_RedEnvelope_giverCreateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverCreateSession; m_send_pack_id = 0; m_send_pack_seq = 0; m_giver_uin = 0; m_re_count = 0; }
+	__Msg_sendReq() { m_send_pack_id = 0; m_send_pack_seq = 0; }
 
 	uint64_t m_send_pack_id;
 	uint32_t m_send_pack_seq;
+};
+
+class __Msg_sendReq_RedEnvelope_giverCreateSession : public __Msg_sendReq
+{
+public:
+	__Msg_sendReq_RedEnvelope_giverCreateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverCreateSession; m_giver_uin = 0; m_re_count = 0; }
+
 	std::string m_wx_re_id;
 	uint32_t m_giver_uin;
 	std::string m_re_qr_code;
 	uint32_t m_re_count;
 };
 
-class __Msg_sendReq_RedEnvelope_giverDeleteSession : public Message
+class __Msg_sendReq_RedEnvelope_giverDeleteSession : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_giverDeleteSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverDeleteSession; m_send_pack_id = 0; m_send_pack_seq = 0; m_giver_uin = 0; }
+	__Msg_sendReq_RedEnvelope_giverDeleteSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverDeleteSession; m_giver_uin = 0; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	std::string m_wx_re_id;
 	uint32_t m_giver_uin;
 };
 
-class __Msg_sendReq_RedEnvelope_giverUpdateSession : public Message
+class __Msg_sendReq_RedEnvelope_giverUpdateSession : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_giverUpdateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverUpdateSession; m_send_pack_id = 0; m_send_pack_seq = 0; m_giver_uin = 0; }
+	__Msg_sendReq_RedEnvelope_giverUpdateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverUpdateSession; m_giver_uin = 0; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	std::string m_wx_re_id;
 	uint32_t m_giver_uin;
 	std::string m_re_qr_code;
 };
 
-class __Msg_sendReq_RedEnvelope_giverReportScanResult : public Message
+class __Msg_sendReq_RedEnvelope_giverReportScanResult : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_giverReportScanResult() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverReportScanResult; m_send_pack_id = 0; m_send_pack_seq = 0; m_giver_uin = 0; }
+	__Msg_sendReq_RedEnvelope_giverReportScanResult() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_giverReportScanResult; m_giver_uin = 0; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	std::string m_wx_re_id;
 	uint32_t m_giver_uin;
 	std::vector<uint32_t> m_recevier_uins;
 };
 
-class __Msg_sendReq_RedEnvelope_receiverCreateSession : public Message
+class __Msg_sendReq_RedEnvelope_receiverCreateSession : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_receiverCreateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverCreateSession; m_send_pack_id = 0; m_send_pack_seq = 0; m_receiver_uin = 0; }
+	__Msg_sendReq_RedEnvelope_receiverCreateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverCreateSession; m_receiver_uin = 0; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	uint32_t m_receiver_uin;
 };
 
-class __Msg_sendReq_RedEnvelope_receiverDeleteSession : public Message
+class __Msg_sendReq_RedEnvelope_receiverDeleteSession : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_receiverDeleteSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverDeleteSession; m_send_pack_id = 0; m_send_pack_seq = 0; m_receiver_uin = 0; }
+	__Msg_sendReq_RedEnvelope_receiverDeleteSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverDeleteSession; m_receiver_uin = 0; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	uint32_t m_receiver_uin;
 };
 
-class __Msg_sendReq_RedEnvelope_receiverUpdateSession : public Message
+class __Msg_sendReq_RedEnvelope_receiverUpdateSession : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_receiverUpdateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverUpdateSession; m_send_pack_id = 0; m_send_pack_seq = 0; m_receiver_uin = 0; m_giver_uin = 0; m_is_re_opened = false; }
+	__Msg_sendReq_RedEnvelope_receiverUpdateSession() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverUpdateSession; m_receiver_uin = 0; m_giver_uin = 0; m_is_re_opened = false; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	uint32_t m_receiver_uin;
 	std::string m_wx_re_id;
 	uint32_t m_giver_uin;
 	bool m_is_re_opened;
 };
 
-class __Msg_sendReq_RedEnvelope_receiverReportScanResult : public Message
+class __Msg_sendReq_RedEnvelope_receiverReportScanResult : public __Msg_sendReq
 {
 public:
-	__Msg_sendReq_RedEnvelope_receiverReportScanResult() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverReportScanResult; m_send_pack_id = 0; m_send_pack_seq = 0; m_receiver_uin = 0; }
+	__Msg_sendReq_RedEnvelope_receiverReportScanResult() { m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_receiverReportScanResult; m_receiver_uin = 0; }
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	uint32_t m_receiver_uin;
 	std::vector<uint32_t> m_giver_uins;
 };
 
-class __Msg_sendReq_RedEnvelope_reportStatistic_zishi : public Message
+class __Msg_sendReq_RedEnvelope_reportStatistic_zishi : public __Msg_sendReq
 {
 public:
 	__Msg_sendReq_RedEnvelope_reportStatistic_zishi()
 	{
 		m_msg_type = __MSG_TYPE_NfClient_sendReq_RedEnvelope_reportStatistic_zisi;
-		m_send_pack_id = 0; 
-		m_send_pack_seq = 0; 
 		m_uin = 0;
 		m_is_sender = false;
 		m_angle = 0;
@@ -149,14 +145,37 @@ public:
 		m_az = 0;
 	}
 
-	uint64_t m_send_pack_id;
-	uint32_t m_send_pack_seq;
 	uint32_t m_uin;
 	bool m_is_sender;
 	int16_t m_angle;
 	int16_t m_ax;
 	int16_t m_ay;
 	int16_t m_az;
+};
+
+class __Msg_sendReq_AddFriend_reportUserInfo : public __Msg_sendReq
+{
+public:
+	__Msg_sendReq_AddFriend_reportUserInfo()
+	{
+		m_msg_type = __MSG_TYPE_NfClient_sendReq_AddFriend_reportUserInfo;
+		m_uin = 0;
+	}
+
+	uint32_t m_uin;
+	std::string m_user_name;
+};
+
+class __Msg_sendReq_AddFriend_queryUserInfo : public __Msg_sendReq
+{
+public:
+	__Msg_sendReq_AddFriend_queryUserInfo()
+	{
+		m_msg_type = __MSG_TYPE_NfClient_sendReq_AddFriend_queryUserInfo;
+		m_uin = 0;
+	}
+
+	uint32_t m_uin;
 };
 
 
@@ -253,6 +272,14 @@ private:
 				__onMsg_sendReq_RedEnvelope_reportStatisticZisi(msg);
 				*is_handled = true;
 				break;
+			case __MSG_TYPE_NfClient_sendReq_AddFriend_reportUserInfo:
+				__onMsg_sendReq_AddFriend_reportUserInfo(msg);
+				*is_handled = true;
+				break;
+			case __MSG_TYPE_NfClient_sendReq_AddFriend_queryUserInfo:
+				__onMsg_sendReq_AddFriend_queryUserInfo(msg);
+				*is_handled = true;
+				break;
 			default:
 				slog_e("NfClient::__Handler: unkonw msg type");
 				*is_handled = true;
@@ -307,6 +334,12 @@ private:
 			break;
 		case __ECgiCmdType_c2sReq_RedEnvelope_ReportStatisticZishi:
 			__onClientCgi_cgiDone_RedEnvelope_reportStatisticZishi(cgi);
+			break;
+		case __ECgiCmdType_c2sReq_AddFriend_ReportUserInfo:
+			__onClientCgi_cgiDone_AddFriend_reportUserInfo(cgi);
+			break;
+		case __ECgiCmdType_c2sReq_AddFriend_QueryUserInfo:
+			__onClientCgi_cgiDone_AddFriend_queryUserInfo(cgi);
 			break;
 
 		default:
@@ -395,6 +428,20 @@ private:
 		__Msg_sendReq_RedEnvelope_reportStatistic_zishi* m = (__Msg_sendReq_RedEnvelope_reportStatistic_zishi*)msg;
 		__startCgi_RedEnvelope_reportStatisticZisi(m->m_send_pack_id, m->m_send_pack_seq
 			, m->m_uin, m->m_is_sender, m->m_angle, m->m_ax, m->m_ay, m->m_az);
+	}
+
+	void __onMsg_sendReq_AddFriend_reportUserInfo(Message* msg)
+	{
+		__Msg_sendReq_AddFriend_reportUserInfo* m = (__Msg_sendReq_AddFriend_reportUserInfo*)msg;
+		__startCgi_AddFriend_reportUserInfo(m->m_send_pack_id, m->m_send_pack_seq
+			, m->m_uin, m->m_user_name);
+	}
+
+	void __onMsg_sendReq_AddFriend_queryUserInfo(Message* msg)
+	{
+		__Msg_sendReq_AddFriend_queryUserInfo* m = (__Msg_sendReq_AddFriend_queryUserInfo*)msg;
+		__startCgi_AddFriend_queryUserInfo(m->m_send_pack_id, m->m_send_pack_seq
+			, m->m_uin);
 	}
 
 	void __onClientCgi_cgiDone_RedEnvelope_giverCreateSession(ClientCgi* cgi)
@@ -504,7 +551,30 @@ private:
 		int err_code = c->getIsSuccess() ? c->m_s2c_resp_err_code : -1;
 		m_init_param.m_callback->onNfClient_recvResp_RedEnvelope_reportStatisticZishi(cgi->getSendPack()->m_send_pack_id, err_code);
 	}
-	
+
+	void __onClientCgi_cgiDone_AddFriend_reportUserInfo(ClientCgi* cgi)
+	{
+		__ClientCgi_AddFriend_reportUserInfo* c = (__ClientCgi_AddFriend_reportUserInfo*)cgi;
+		if (!cgi->getIsSuccess())
+			slog_e("cgi fail, seq:%0", cgi->getSendPack()->m_send_seq);
+		else
+			slog_i("resp= seq:%0, %1", c->getRecvPack()->m_recv_seq, c->m_s2c_resp_body.c_str());
+
+		int err_code = c->getIsSuccess() ? c->m_s2c_resp_err_code : -1;
+		m_init_param.m_callback->onNfClient_recvResp_AddFriend_reportUserInfo(cgi->getSendPack()->m_send_pack_id, err_code);
+	}
+
+	void __onClientCgi_cgiDone_AddFriend_queryUserInfo(ClientCgi* cgi)
+	{
+		__ClientCgi_AddFriend_queryUserInfo* c = (__ClientCgi_AddFriend_queryUserInfo*)cgi;
+		if (!cgi->getIsSuccess())
+			slog_e("cgi fail, seq:%0", cgi->getSendPack()->m_send_seq);
+		else
+			slog_i("resp= seq:%0, %1", c->getRecvPack()->m_recv_seq, c->m_s2c_resp_body.c_str());
+
+		int err_code = c->getIsSuccess() ? c->m_s2c_resp_err_code : -1;
+		m_init_param.m_callback->onNfClient_recvResp_AddFriend_queryUserInfo(cgi->getSendPack()->m_send_pack_id, err_code, c->m_s2c_resp_uin, c->m_s2c_resp_user_name);
+	}
 
 
 
@@ -677,6 +747,46 @@ private:
 
 		__ClientCgi_RedEnvelope_reportStatisticZishi* cgi = new __ClientCgi_RedEnvelope_reportStatisticZishi();
 		if (!cgi->initSendPack(m_cgi_ctx, uin, is_sender, angle, ax, ay, az))
+		{
+			slog_e("fail to init cgi");
+			return;
+		}
+		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
+
+		if (!getCgiMgr()->startCgi(cgi))
+		{
+			slog_e("fail to startCgi");
+			return;
+		}
+	}
+
+	void __startCgi_AddFriend_reportUserInfo(uint64_t send_pack_id, uint32_t send_pack_seq, uint32_t uin, const std::string& user_name)
+	{
+		m_cgi_ctx.m_send_pack_id = send_pack_id;
+		m_cgi_ctx.m_send_pack_seq = send_pack_seq;
+
+		__ClientCgi_AddFriend_reportUserInfo* cgi = new __ClientCgi_AddFriend_reportUserInfo();
+		if (!cgi->initSendPack(m_cgi_ctx, uin, user_name))
+		{
+			slog_e("fail to init cgi");
+			return;
+		}
+		slog_i("req = seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_c2s_req_body.c_str());
+
+		if (!getCgiMgr()->startCgi(cgi))
+		{
+			slog_e("fail to startCgi");
+			return;
+		}
+	}
+
+	void __startCgi_AddFriend_queryUserInfo(uint64_t send_pack_id, uint32_t send_pack_seq, uint32_t uin)
+	{
+		m_cgi_ctx.m_send_pack_id = send_pack_id;
+		m_cgi_ctx.m_send_pack_seq = send_pack_seq;
+
+		__ClientCgi_AddFriend_queryUserInfo* cgi = new __ClientCgi_AddFriend_queryUserInfo();
+		if (!cgi->initSendPack(m_cgi_ctx, uin))
 		{
 			slog_e("fail to init cgi");
 			return;
@@ -896,6 +1006,35 @@ uint64_t NfClient::sendReq_RedEnvelope_reportStatistic_Zisi(uint32_t uin, bool i
 	msg->m_ax = ax;
 	msg->m_ay = ay;
 	msg->m_az = az;
+	__postMessage(msg);
+
+	return msg->m_send_pack_id;
+}
+
+uint64_t NfClient::sendReq_AddFriend_reportUserInfo(uint32_t uin, const std::string & user_name)
+{
+	if (m_thread == nullptr)
+		return 0;
+
+	__Msg_sendReq_AddFriend_reportUserInfo* msg = new __Msg_sendReq_AddFriend_reportUserInfo();
+	msg->m_send_pack_id = ++m_send_pack_id_seed;
+	msg->m_send_pack_seq = ++m_send_pack_seq_seed;
+	msg->m_uin = uin;
+	msg->m_user_name = user_name;
+	__postMessage(msg);
+
+	return msg->m_send_pack_id;
+}
+
+uint64_t NfClient::sendReq_AddFriend_queryUserInfo(uint32_t uin)
+{
+	if (m_thread == nullptr)
+		return 0;
+
+	__Msg_sendReq_AddFriend_queryUserInfo* msg = new __Msg_sendReq_AddFriend_queryUserInfo();
+	msg->m_send_pack_id = ++m_send_pack_id_seed;
+	msg->m_send_pack_seq = ++m_send_pack_seq_seed;
+	msg->m_uin = uin;
 	__postMessage(msg);
 
 	return msg->m_send_pack_id;

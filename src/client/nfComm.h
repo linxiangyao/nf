@@ -14,6 +14,8 @@ USING_NAMESPACE_S
 #define __ECgiCmdType_c2sReq_RedEnvelope_ReceiverUpdateSession 1007
 #define __ECgiCmdType_c2sReq_RedEnvelope_ReceiverReportScanResult 1008
 #define __ECgiCmdType_c2sReq_RedEnvelope_ReportStatisticZishi 1101
+#define __ECgiCmdType_c2sReq_AddFriend_ReportUserInfo 1201
+#define __ECgiCmdType_c2sReq_AddFriend_QueryUserInfo 1202
 
 #define __ECgiCmdType_s2cResp_RedEnvelope_GiverCreateSession 2001
 #define __ECgiCmdType_s2cResp_RedEnvelope_GiverDeleteSession 2002
@@ -24,6 +26,9 @@ USING_NAMESPACE_S
 #define __ECgiCmdType_s2cResp_RedEnvelope_ReceiverUpdateSession 2007
 #define __ECgiCmdType_s2cResp_RedEnvelope_ReceiverReportScanResult 2008
 #define __ECgiCmdType_s2cResp_RedEnvelope_ReportStatisticZishi 2101
+#define __ECgiCmdType_s2cResp_AddFriend_ReportUserInfo 2201
+#define __ECgiCmdType_s2cResp_AddFriend_QueryUserInfo 2202
+
 
 #define __ECgiCmdType_s2cPush_RedEnvelope_MatchResult 3001
 
