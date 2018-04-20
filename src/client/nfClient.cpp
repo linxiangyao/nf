@@ -276,7 +276,7 @@ private:
 	virtual void onClientNetwork_cgiDone(ClientNetwork* network, ClientCgi * cgi) override
 	{
 		ClientNetworkMsgLooperHandler::onClientNetwork_cgiDone(network, cgi);
-		slog_d("cgi done\n");
+		slog_d("cgi done");
 
 		switch (cgi->getCgiInfo().m_send_cmd_type)
 		{
@@ -920,7 +920,7 @@ void __initNfClientLog()
 {
 	Log::releaseInstance();
 #ifdef S_OS_WIN
-	Log::instance().setEnableLogLevel(ELogLevel_info);
+	Log::instance().setEnableLogLevel(ELogLevel_debug);
 #else
 	Log::instance().setEnableLogLevel(ELogLevel_debug);
 #endif // S_OS_WIN

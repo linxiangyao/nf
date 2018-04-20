@@ -8,3 +8,6 @@
 /project/win/nf/nfClient/x64
 
 /project/win/nf/nfServer/x64
+/project/win/nf/nfClient/*.log
+/project/win/nf/*.log
+/project/win/nf/*.db
