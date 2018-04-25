@@ -8,9 +8,9 @@ ClientCgiInfo __ClientCgi_RedEnvelope_receiverDeleteSession::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_receiverUpdateSession::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_receiverReportScanResult::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_reportStatisticZishi::s_cgi_info;
+ClientCgiInfo __ClientCgi_RedEnvelope_matchResult::s_cgi_info;
 ClientCgiInfo __ClientCgi_AddFriend_reportUserInfo::s_cgi_info;
 ClientCgiInfo __ClientCgi_AddFriend_queryUserInfo::s_cgi_info;
-ClientCgiInfo __ClientCgi_RedEnvelope_matchResult::s_cgi_info;
 ClientCgiInfo __ClientCgi_AddFriend_matchResult::s_cgi_info;
 
 
@@ -26,10 +26,11 @@ std::map<uint32_t, ClientCgiInfo> __getCgiInfoMap()
 	cgi_infos[__ClientCgi_RedEnvelope_receiverUpdateSession::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_receiverUpdateSession::s_getCgiInfo();
 	cgi_infos[__ClientCgi_RedEnvelope_receiverReportScanResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_receiverReportScanResult::s_getCgiInfo();
 	cgi_infos[__ClientCgi_RedEnvelope_reportStatisticZishi::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_reportStatisticZishi::s_getCgiInfo();
+	cgi_infos[__ClientCgi_RedEnvelope_matchResult::s_getCgiInfo().m_recv_cmd_type] = __ClientCgi_RedEnvelope_matchResult::s_getCgiInfo();
+
 	cgi_infos[__ClientCgi_AddFriend_reportUserInfo::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_reportUserInfo::s_getCgiInfo();
 	cgi_infos[__ClientCgi_AddFriend_queryUserInfo::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_queryUserInfo::s_getCgiInfo();
-	cgi_infos[__ClientCgi_RedEnvelope_matchResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_matchResult::s_getCgiInfo();
-	cgi_infos[__ClientCgi_AddFriend_matchResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_matchResult::s_getCgiInfo();
+	cgi_infos[__ClientCgi_AddFriend_matchResult::s_getCgiInfo().m_recv_cmd_type] = __ClientCgi_AddFriend_matchResult::s_getCgiInfo();
 	return cgi_infos;
 }
 
