@@ -11,6 +11,7 @@ ClientCgiInfo __ClientCgi_RedEnvelope_reportStatisticZishi::s_cgi_info;
 ClientCgiInfo __ClientCgi_AddFriend_reportUserInfo::s_cgi_info;
 ClientCgiInfo __ClientCgi_AddFriend_queryUserInfo::s_cgi_info;
 ClientCgiInfo __ClientCgi_RedEnvelope_matchResult::s_cgi_info;
+ClientCgiInfo __ClientCgi_AddFriend_matchResult::s_cgi_info;
 
 
 std::map<uint32_t, ClientCgiInfo> __getCgiInfoMap()
@@ -28,6 +29,7 @@ std::map<uint32_t, ClientCgiInfo> __getCgiInfoMap()
 	cgi_infos[__ClientCgi_AddFriend_reportUserInfo::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_reportUserInfo::s_getCgiInfo();
 	cgi_infos[__ClientCgi_AddFriend_queryUserInfo::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_queryUserInfo::s_getCgiInfo();
 	cgi_infos[__ClientCgi_RedEnvelope_matchResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_RedEnvelope_matchResult::s_getCgiInfo();
+	cgi_infos[__ClientCgi_AddFriend_matchResult::s_getCgiInfo().m_send_cmd_type] = __ClientCgi_AddFriend_matchResult::s_getCgiInfo();
 	return cgi_infos;
 }
 
@@ -173,9 +175,11 @@ public:
 	{
 		m_msg_type = __MSG_TYPE_NfClient_sendReq_AddFriend_queryUserInfo;
 		m_uin = 0;
+		m_scaned_uin = 0;
 	}
 
 	uint32_t m_uin;
+	uint32_t m_scaned_uin;
 };
 
 
@@ -360,6 +364,14 @@ private:
 			m_init_param.m_callback->onNfClient_recvPush_RedEnvelope_matchResult(
 				cgi.m_s2c_push_giver_uin, cgi.m_s2c_push_wx_re_id, cgi.m_s2c_push_re_qr_code, cgi.m_s2c_push_receiver_uins);
 		}
+		else if (p->m_recv_cmd_type == __ECgiCmdType_s2cPush_AddFriend_MatchResult)
+		{
+			__ClientCgi_AddFriend_matchResult cgi;
+			cgi.setRecvPack(recv_pack->release());
+			slog_i("push= %0", cgi.m_s2c_push_body);
+			m_init_param.m_callback->onNfClient_recvPush_AddFriend_matchResult(
+				cgi.m_s2c_push_matched_uin, cgi.m_s2c_push_matched_user_name);
+		}
 	}
 
 	virtual void onClientCgiMgr_recvS2cReqPack(std::unique_ptr<ClientNetwork::RecvPack>* recv_pack) override
@@ -441,7 +453,7 @@ private:
 	{
 		__Msg_sendReq_AddFriend_queryUserInfo* m = (__Msg_sendReq_AddFriend_queryUserInfo*)msg;
 		__startCgi_AddFriend_queryUserInfo(m->m_send_pack_id, m->m_send_pack_seq
-			, m->m_uin);
+			, m->m_uin, m->m_scaned_uin);
 	}
 
 	void __onClientCgi_cgiDone_RedEnvelope_giverCreateSession(ClientCgi* cgi)
@@ -780,13 +792,13 @@ private:
 		}
 	}
 
-	void __startCgi_AddFriend_queryUserInfo(uint64_t send_pack_id, uint32_t send_pack_seq, uint32_t uin)
+	void __startCgi_AddFriend_queryUserInfo(uint64_t send_pack_id, uint32_t send_pack_seq, uint32_t my_uin, uint32_t scaned_uin)
 	{
 		m_cgi_ctx.m_send_pack_id = send_pack_id;
 		m_cgi_ctx.m_send_pack_seq = send_pack_seq;
 
 		__ClientCgi_AddFriend_queryUserInfo* cgi = new __ClientCgi_AddFriend_queryUserInfo();
-		if (!cgi->initSendPack(m_cgi_ctx, uin))
+		if (!cgi->initSendPack(m_cgi_ctx, my_uin, scaned_uin))
 		{
 			slog_e("fail to init cgi");
 			return;
@@ -1026,7 +1038,7 @@ uint64_t NfClient::sendReq_AddFriend_reportUserInfo(uint32_t uin, const std::str
 	return msg->m_send_pack_id;
 }
 
-uint64_t NfClient::sendReq_AddFriend_queryUserInfo(uint32_t uin)
+uint64_t NfClient::sendReq_AddFriend_queryUserInfo(uint32_t uin, uint32_t scaned_uin)
 {
 	if (m_thread == nullptr)
 		return 0;
@@ -1035,6 +1047,7 @@ uint64_t NfClient::sendReq_AddFriend_queryUserInfo(uint32_t uin)
 	msg->m_send_pack_id = ++m_send_pack_id_seed;
 	msg->m_send_pack_seq = ++m_send_pack_seq_seed;
 	msg->m_uin = uin;
+	msg->m_scaned_uin = scaned_uin;
 	__postMessage(msg);
 
 	return msg->m_send_pack_id;

@@ -480,6 +480,7 @@ private:
 	static ClientCgiInfo s_cgi_info;
 };
 
+
 class __ClientCgi_AddFriend_queryUserInfo : public __ClientCgi_RedEnvelope_base
 {
 public:
@@ -493,10 +494,12 @@ public:
 
 	virtual const ClientCgiInfo & getCgiInfo() const { return s_getCgiInfo(); }
 
-	bool initSendPack(__ClientSendPackBuilder& ctx, uint32_t uin)
+	bool initSendPack(__ClientSendPackBuilder& ctx, uint32_t uin, uint32_t scaned_uin)
 	{
 		m_c2s_req_body = std::string() + "af_query_user_info: "
-			+ "uin=" + StringUtil::toString(uin) + ",";
+			+ "uin=" + StringUtil::toString(uin) + ","
+			+ "scaned_uin=" + StringUtil::toString(scaned_uin) + ","
+			;
 
 		__initSendPack(ctx);
 		return true;
@@ -567,6 +570,38 @@ private:
 			m_s2c_push_receiver_uins.push_back(uin);
 		}
 	
+	}
+
+	static ClientCgiInfo s_cgi_info;
+};
+
+class __ClientCgi_AddFriend_matchResult : public ClientCgi
+{
+public:
+	static const ClientCgiInfo & s_getCgiInfo()
+	{
+		s_cgi_info.m_cgi_type = EClientCgiType_s2cPush;
+		s_cgi_info.m_recv_cmd_type = __ECgiCmdType_s2cPush_AddFriend_MatchResult;
+		return s_cgi_info;
+	}
+
+	virtual const ClientCgiInfo & getCgiInfo() const { return s_getCgiInfo(); }
+
+	std::string m_s2c_push_body;
+	uint32_t m_s2c_push_uin;
+	uint32_t m_s2c_push_matched_uin;
+	std::string m_s2c_push_matched_user_name;
+
+
+private:
+	virtual void onSetRecvPackEnd()
+	{
+		RecvPack* recv_pack = getRecvPack();
+		StPacker::Pack* st_pack = (StPacker::Pack*)recv_pack->m_recv_ext;
+		m_s2c_push_body = (const char*)st_pack->m_body.getData();
+		m_s2c_push_uin = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_push_body, "uin=", ","));
+		m_s2c_push_matched_uin = StringUtil::parseUint(StringUtil::fetchMiddle(m_s2c_push_body, "matched_uin=", ","));
+		m_s2c_push_matched_user_name = StringUtil::fetchMiddle(m_s2c_push_body, "matched_user_name=", ",");
 	}
 
 	static ClientCgiInfo s_cgi_info;

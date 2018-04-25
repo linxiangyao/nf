@@ -31,6 +31,7 @@ USING_NAMESPACE_S
 
 
 #define __ECgiCmdType_s2cPush_RedEnvelope_MatchResult 3001
+#define __ECgiCmdType_s2cPush_AddFriend_MatchResult 3101
 
 
 

@@ -34,6 +34,8 @@ public:
 		m_cgi_infos.push_back(__ServerCgi_redEnvelopeMatchResult::s_getServerCgiInfo());
 		m_cgi_infos.push_back(__ServerCgi_AddFriend_reportUserInfo::s_getServerCgiInfo());
 		m_cgi_infos.push_back(__ServerCgi_AddFriend_queryUserInfo::s_getServerCgiInfo());
+		m_cgi_infos.push_back(__ServerCgi_AddFriend_matchResult::s_getServerCgiInfo());
+		
 
 		m_packer = new StPacker();
 
@@ -208,6 +210,104 @@ private:
 		__ScanTable m_scan_table;
 	};
 
+	class __AddFriendSession
+	{
+	public:
+		__AddFriendSession()
+		{
+			m_sid = 0;
+			m_session_create_time_ms = 0;
+			m_session_live_start_time_ms = 0;
+			m_uin = 0;
+			m_scaned_uin = 0;
+		}
+
+		~__AddFriendSession()
+		{
+			slog_i("delete add_friend_session, uin=%0", m_uin);
+		}
+
+		void refreshSession(socket_id_t sid, session_id_t ssid)
+		{
+			m_sid = sid;
+			m_ssid = ssid;
+			m_session_live_start_time_ms = TimeUtil::getMsTime();
+		}
+
+		bool isSessionTimeout()
+		{
+			return TimeUtil::getMsTime() - m_session_live_start_time_ms > 60 * 1000;
+		}
+
+		socket_id_t m_sid;
+		session_id_t m_ssid;
+		uint64_t m_session_create_time_ms;
+		uint64_t m_session_live_start_time_ms;
+		uint32_t m_uin;
+		std::string m_user_name;
+		uint32_t m_scaned_uin;
+	};
+
+	class __AddFriendCtx
+	{
+	public:
+		__AddFriendCtx()
+		{
+		}
+
+		~__AddFriendCtx()
+		{
+			delete_and_erase_collection_elements(&m_sessions);
+		}
+
+		void checkSessionTimeout()
+		{
+			std::vector<uint32_t> add_friend_timeout_uins;
+			for (auto it = m_sessions.begin(); it != m_sessions.end(); ++it)
+			{
+				if (it->second->isSessionTimeout())
+				{
+					slog_i("add_friend_session timeout, uin=%0", it->first);
+					add_friend_timeout_uins.push_back(it->first);
+				}
+			}
+			delete_and_erase_map_elements_by_keys(&m_sessions, add_friend_timeout_uins);
+		}
+
+		__AddFriendSession* createOrRefreshSession(uint32_t uin, socket_id_t sid, session_id_t ssid)
+		{
+			__AddFriendSession* session = getSessionByUin(uin);
+			if (session == nullptr)
+				session = createSession(uin, sid, ssid);
+			else
+				session->refreshSession(sid, ssid);
+			return session;
+		}
+
+		__AddFriendSession* createSession(uint32_t uin, socket_id_t sid, session_id_t ssid)
+		{
+			__AddFriendSession* af_session = new __AddFriendSession();
+			af_session->m_sid = sid;
+			af_session->m_ssid = ssid;
+			af_session->m_session_create_time_ms = TimeUtil::getMsTime();
+			af_session->m_session_live_start_time_ms = af_session->m_session_create_time_ms;
+			af_session->m_uin = uin;
+			m_sessions[af_session->m_uin] = af_session;
+			slog_i("create add_friend_session, uin=%0", uin);
+			return af_session;
+		}
+
+		__AddFriendSession* getSessionByUin(uint32_t uin)
+		{
+			auto it = m_sessions.find(uin);
+			if (it == m_sessions.end())
+				return nullptr;
+			else
+				return it->second;
+		}
+
+		std::map <uint32_t, __AddFriendSession*> m_sessions;
+	};
 
 
 
@@ -232,6 +332,7 @@ private:
 		if (timer_id != m_check_session_timer)
 			return;
 
+		// giver
 		{
 			std::vector<uint32_t> timeout_giver_uins;
 			for (auto it = m_giver_sessions.begin(); it != m_giver_sessions.end(); ++it)
@@ -246,6 +347,7 @@ private:
 			delete_and_erase_map_elements_by_keys(&m_giver_sessions, timeout_giver_uins);
 		}
 
+		// receiver
 		{
 			std::vector<uint32_t> timeout_receiver_uins;
 			for (auto it = m_receiver_sessions.begin(); it != m_receiver_sessions.end(); ++it)
@@ -258,6 +360,11 @@ private:
 				}
 			}
 			delete_and_erase_map_elements_by_keys(&m_receiver_sessions, timeout_receiver_uins);
+		}
+
+		// add friend
+		{
+			m_add_friend_ctx.checkSessionTimeout();
 		}
 	}
 
@@ -748,15 +855,7 @@ private:
 		}
 	}
 
-
-	class __AddFriendCtx
-	{
-	public:
-		std::map < uint32_t, std::string> m_uin_to_user_name;
-	};
-	__AddFriendCtx m_add_friend_ctx;
-
-	void __onServerCgiMgr_recvC2sReqPack_AddFriend_reportUserInfo(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_AddFriend_reportUserInfo(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx) // report my user info
 	{
 		__ServerCgi_AddFriend_reportUserInfo* cgi = new __ServerCgi_AddFriend_reportUserInfo();
 		cgi->setRecvPack(recv_pack->release());
@@ -764,7 +863,8 @@ private:
 
 		uint32_t err_code = 0;
 		{
-			m_add_friend_ctx.m_uin_to_user_name[cgi->m_c2sReq_uin] = cgi->m_c2sReq_user_name;
+			__AddFriendSession* session = m_add_friend_ctx.createOrRefreshSession(cgi->m_c2sReq_uin, cgi->getRecvPack()->m_sid, cgi->getRecvPack()->m_ssid);
+			session->m_user_name = cgi->m_c2sReq_user_name;
 		}
 
 		cgi->initSendPack(cgi_ctx, err_code);
@@ -775,37 +875,78 @@ private:
 		}
 	}
 
-	void __onServerCgiMgr_recvC2sReqPack_AddFriend_queryUserInfo(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx)
+	void __onServerCgiMgr_recvC2sReqPack_AddFriend_queryUserInfo(std::unique_ptr<ServerCgi::RecvPack>* recv_pack, const __ServerCgiCtx& cgi_ctx) // report scaned other user
 	{
 		__ServerCgi_AddFriend_queryUserInfo* cgi = new __ServerCgi_AddFriend_queryUserInfo();
 		cgi->setRecvPack(recv_pack->release());
 		slog_i("req = seq:%0, %1", cgi->getRecvPack()->m_recv_seq, cgi->m_c2sReq_body.c_str());
 
 		uint32_t err_code = 0;
-		uint32_t uin = 0;
-		std::string user_name;
+		uint32_t scaned_uin = 0;
+		std::string scaned_user_name;
 		{
-			auto it = m_add_friend_ctx.m_uin_to_user_name.find(cgi->m_c2sReq_uin);
-			if (it != m_add_friend_ctx.m_uin_to_user_name.end())
+			__AddFriendSession* my_session = m_add_friend_ctx.getSessionByUin(cgi->m_c2sReq_uin);
+			if(my_session != nullptr)
 			{
-				uin = cgi->m_c2sReq_uin;
-				user_name = it->second;
+				my_session->refreshSession(cgi->getRecvPack()->m_sid, cgi->getRecvPack()->m_ssid);
+				my_session->m_scaned_uin = cgi->m_c2sReq_scaned_uin;
+			}
+
+			__AddFriendSession* scaned_session = m_add_friend_ctx.getSessionByUin(cgi->m_c2sReq_scaned_uin);
+			if (scaned_session != nullptr)
+			{
+				scaned_uin = scaned_session->m_uin;
+				scaned_user_name = scaned_session->m_user_name;
 			}
 		}
 
-		cgi->initSendPack(cgi_ctx, err_code, uin, user_name);
+		cgi->initSendPack(cgi_ctx, err_code, scaned_uin, scaned_user_name);
 		slog_i("resp= seq:%0, %1", cgi->getSendPack()->m_send_seq, cgi->m_s2cResp_body.c_str());
 		if (!getCgiMgr()->startCgi(cgi))
 		{
 			slog_e("fail to start cgi");
 		}
+		
+		__matchAndPushAddFriend(cgi->m_c2sReq_uin, cgi->m_c2sReq_scaned_uin);
 	}
 
 
 
 
 
+	void __matchAndPushAddFriend(uint32_t uin, uint32_t scaned_uin)
+	{
+		__AddFriendSession* s1 = m_add_friend_ctx.getSessionByUin(uin);
+		if (s1 == nullptr)
+			return;
 
+		__AddFriendSession* s2 = m_add_friend_ctx.getSessionByUin(scaned_uin);
+		if (s2 == nullptr)
+			return;
+
+		bool has_scaned = false;
+		if (s1->m_scaned_uin == s2->m_uin || s2->m_scaned_uin == s1->m_uin)
+			has_scaned = true;
+		if (!has_scaned)
+			return;
+
+		__pushAddFriend(s1, s2);
+		__pushAddFriend(s2, s1);
+	}
+
+	void __pushAddFriend(__AddFriendSession* my_session, __AddFriendSession* scaned_session)
+	{
+		__ServerCgiCtx cgi_ctx = __genServerCgiCtx(my_session->m_sid, my_session->m_ssid);
+		__ServerCgi_AddFriend_matchResult* cgi = new __ServerCgi_AddFriend_matchResult();
+		cgi->initSendPack(cgi_ctx, my_session->m_uin, scaned_session->m_uin, scaned_session->m_user_name);
+
+		slog_i("push= %0", cgi->m_s2c_push_body.c_str());
+
+		if (!getCgiMgr()->startCgi(cgi))
+		{
+			slog_e("fail to start cgi");
+		}
+	}
 
 	void __matchReAndPush()
 	{
@@ -1086,6 +1227,9 @@ private:
 		case __ECgiCmdType_s2cResp_RedEnvelope_ReceiverUpdateSession: return "re_receiver_update_sessin";
 		case __ECgiCmdType_s2cResp_RedEnvelope_ReceiverReportScanResult: return "re_receiver_report_scan";
 		case __ECgiCmdType_s2cPush_RedEnvelope_MatchResult: return "re_match_result";
+		case __ECgiCmdType_s2cResp_AddFriend_QueryUserInfo: return "af_query_user_info";
+		case __ECgiCmdType_s2cResp_AddFriend_ReportUserInfo: return "af_report_user_info";
+		case __ECgiCmdType_s2cPush_AddFriend_MatchResult: return "af_match_result";
 		default:
 			break;
 		}
@@ -1146,6 +1290,7 @@ private:
 	std::vector<NfServerDb::Record_ReInfo> m_re_infos;
 	std::map<uint32_t, __RedEnvelopeGiverSession*> m_giver_sessions;
 	std::map<uint32_t, __RedEnvelopeReceiverSession*> m_receiver_sessions;
+	__AddFriendCtx m_add_friend_ctx;
 };
 
 

@@ -167,34 +167,34 @@ private:
 		if (m_client == nullptr)
 			return;
 
-		if (m_role == __ERole_giver)
-		{
-			m_client->sendReq_RedEnvelope_giverReportScanResult(m_wx_re_id, m_giver_uin, m_scan_uins);
+		//if (m_role == __ERole_giver)
+		//{
+		//	m_client->sendReq_RedEnvelope_giverReportScanResult(m_wx_re_id, m_giver_uin, m_scan_uins);
 
-			// 每30秒更新一次qrCode
-			uint64_t cur_time = TimeUtil::getMsTime();
-			if (cur_time - m_update_start_time_ms > 30 * 1000)
-			{
-				m_update_start_time_ms = cur_time;
-				m_re_qr_code = __genReQrCode(cur_time);
-				m_client->sendReq_RedEnvelope_giverUpdateSession(m_wx_re_id, m_giver_uin, m_re_qr_code);
-			}
-		}
-		else
-		{
-			if (!m_is_matched)
-			{
-				m_client->sendReq_RedEnvelope_receiverReportScanResult(m_receiver_uin, m_scan_uins);
-			}
+		//	// 每30秒更新一次qrCode
+		//	uint64_t cur_time = TimeUtil::getMsTime();
+		//	if (cur_time - m_update_start_time_ms > 30 * 1000)
+		//	{
+		//		m_update_start_time_ms = cur_time;
+		//		m_re_qr_code = __genReQrCode(cur_time);
+		//		m_client->sendReq_RedEnvelope_giverUpdateSession(m_wx_re_id, m_giver_uin, m_re_qr_code);
+		//	}
+		//}
+		//else
+		//{
+		//	if (!m_is_matched)
+		//	{
+		//		m_client->sendReq_RedEnvelope_receiverReportScanResult(m_receiver_uin, m_scan_uins);
+		//	}
 
-			// 收到红包后，5秒后拆开红包，并删除session
-			if (m_is_matched && !m_is_opened && TimeUtil::getMsTime() - m_update_start_time_ms > 5 * 1000)
-			{
-				m_is_opened = true;
-				m_client->sendReq_RedEnvelope_receiverUpdateSession(m_receiver_uin, m_wx_re_id, m_giver_uin, true);
-				m_client->sendReq_RedEnvelope_receiverDeleteSession(m_receiver_uin);
-			}
-		}
+		//	// 收到红包后，5秒后拆开红包，并删除session
+		//	if (m_is_matched && !m_is_opened && TimeUtil::getMsTime() - m_update_start_time_ms > 5 * 1000)
+		//	{
+		//		m_is_opened = true;
+		//		m_client->sendReq_RedEnvelope_receiverUpdateSession(m_receiver_uin, m_wx_re_id, m_giver_uin, true);
+		//		m_client->sendReq_RedEnvelope_receiverDeleteSession(m_receiver_uin);
+		//	}
+		//}
 	}
 	
 	virtual void onNfClient_recvResp_RedEnvelope_giverCreateSession(uint64_t cgi_id, int err_code) override
@@ -263,6 +263,10 @@ private:
 	virtual void onNfClient_recvResp_AddFriend_queryUserInfo(uint64_t cgi_id, int err_code, uint32_t uin, const std::string& user_name) override
 	{
 
+	}
+
+	virtual void onNfClient_recvPush_AddFriend_matchResult(uint32_t other_uin, const std::string & other_user_name) override
+	{
 	}
 
 	void __onMsg_recvResp_RedEnvelope_giverCreateSession(Message* msg)
@@ -341,18 +345,25 @@ private:
 		m_client->startClient();
 		if (m_role == __ERole_giver)
 		{
-			m_client->sendReq_RedEnvelope_giverCreateSession(m_wx_re_id, m_giver_uin, m_re_qr_code, 10);
+			//m_client->sendReq_RedEnvelope_giverCreateSession(m_wx_re_id, m_giver_uin, m_re_qr_code, 10);
 		}
 		else
 		{
-			m_client->sendReq_RedEnvelope_receiverCreateSession(m_receiver_uin);
+			//m_client->sendReq_RedEnvelope_receiverCreateSession(m_receiver_uin);
 		}
 
-		m_client->sendReq_RedEnvelope_reportStatistic_Zisi(1024, true, 180, 100, 200, -300);
-		m_client->sendReq_AddFriend_reportUserInfo(1, "ryan");
-		m_client->sendReq_AddFriend_reportUserInfo(2, "lin");
-		m_client->sendReq_AddFriend_queryUserInfo(1);
-		m_client->sendReq_AddFriend_queryUserInfo(2);
+		//m_client->sendReq_RedEnvelope_reportStatistic_Zisi(1024, true, 180, 100, 200, -300);
+
+		if (m_role == __ERole_giver)
+		{
+			m_client->sendReq_AddFriend_reportUserInfo(1, "ryan");
+			m_client->sendReq_AddFriend_queryUserInfo(1, 2);
+		}
+		else
+		{
+			m_client->sendReq_AddFriend_reportUserInfo(2, "lin");
+			m_client->sendReq_AddFriend_queryUserInfo(2, 1);
+		}
 	}
 
 	void __postMsgToSelf(__EMsgType msg_type, uint64_t cgi_id, int err_code)
@@ -386,6 +397,8 @@ private:
 	bool m_is_matched;
 	bool m_is_opened;
 	uint64_t m_update_start_time_ms;
+
+	// 通过 ICallback 继承
 };
 
 

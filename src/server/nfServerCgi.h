@@ -555,8 +555,6 @@ private:
 ServerCgiInfo __ServerCgi_AddFriend_reportUserInfo::s_cgi_info;
 
 
-
-
 class __ServerCgi_AddFriend_queryUserInfo : public ServerCgi
 {
 public:
@@ -584,6 +582,7 @@ public:
 
 	std::string m_c2sReq_body;
 	uint32_t m_c2sReq_uin;
+	uint32_t m_c2sReq_scaned_uin;
 
 	std::string m_s2cResp_body;
 
@@ -594,11 +593,46 @@ private:
 		StPacker::Pack* st_pack = (StPacker::Pack*)(getRecvPack()->m_recv_ext);
 		m_c2sReq_body = (const char*)st_pack->m_body.getData();
 		m_c2sReq_uin = StringUtil::parseUint(StringUtil::fetchMiddle(m_c2sReq_body, "uin=", ","));
+		m_c2sReq_scaned_uin = StringUtil::parseUint(StringUtil::fetchMiddle(m_c2sReq_body, "scaned_uin=", ","));
 	}
 
 	static ServerCgiInfo s_cgi_info;
 };
 ServerCgiInfo __ServerCgi_AddFriend_queryUserInfo::s_cgi_info;
+
+
+class __ServerCgi_AddFriend_matchResult : public ServerCgi
+{
+public:
+	static const ServerCgiInfo & s_getServerCgiInfo()
+	{
+		s_cgi_info.m_cgi_type = EServerCgiType_s2cPush;
+		s_cgi_info.m_send_cmd_type = __ECgiCmdType_s2cPush_AddFriend_MatchResult;
+		return s_cgi_info;
+	}
+
+	virtual const ServerCgiInfo& getServerCgiInfo() const override { return s_getServerCgiInfo(); }
+
+	virtual void initSendPack(const __ServerCgiCtx& cgi_ctx, uint32_t uin, uint32_t matched_uin, const std::string& matched_user_name)
+	{
+		m_s2c_push_body = std::string() + "af_matchs: "
+			+ "uin=" + StringUtil::toString(uin) + ","
+			+ "matched_uin=" + StringUtil::toString(matched_uin) + ","
+			+ "matched_user_name=" + matched_user_name + ","
+			;
+		SendPack* send_pack = cgi_ctx.newSendPackAndPack(getServerCgiInfo().m_send_cmd_type, 0, (const byte_t*)m_s2c_push_body.c_str(), m_s2c_push_body.size() + 1);
+		setSendPack(send_pack);
+		setCallback(cgi_ctx.m_callback);
+	}
+
+
+	std::string m_s2c_push_body;
+
+
+private:
+	static ServerCgiInfo s_cgi_info;
+};
+ServerCgiInfo __ServerCgi_AddFriend_matchResult::s_cgi_info;
 
 
 

@@ -31,7 +31,8 @@ public:
 		virtual void onNfClient_recvResp_RedEnvelope_reportStatisticZishi(uint64_t cgi_id, int err_code) = 0;
 		virtual void onNfClient_recvPush_RedEnvelope_matchResult(uint32_t giver_uin, const std::string& wx_re_id, const std::string& re_qr_code, const std::vector<uint32_t>& recevier_uins) = 0;
 		virtual void onNfClient_recvResp_AddFriend_reportUserInfo(uint64_t cgi_id, int err_code) = 0;
-		virtual void onNfClient_recvResp_AddFriend_queryUserInfo(uint64_t cgi_id, int err_code, uint32_t uin, const std::string& user_name) = 0;
+		virtual void onNfClient_recvResp_AddFriend_queryUserInfo(uint64_t cgi_id, int err_code, uint32_t scaned_uin, const std::string& scaned_user_name) = 0;
+		virtual void onNfClient_recvPush_AddFriend_matchResult(uint32_t matched_uin, const std::string& matched_user_name) = 0;
 	};
 
 
@@ -50,7 +51,7 @@ public:
 	uint64_t sendReq_RedEnvelope_receiverReportScanResult(uint32_t receiver_uin, const std::vector<uint32_t>& giver_uins);
 	uint64_t sendReq_RedEnvelope_reportStatistic_Zisi(uint32_t uin, bool is_sender, int16_t angle, int16_t ax, int16_t ay, int16_t az);
 	uint64_t sendReq_AddFriend_reportUserInfo(uint32_t uin, const std::string& user_name);
-	uint64_t sendReq_AddFriend_queryUserInfo(uint32_t uin);
+	uint64_t sendReq_AddFriend_queryUserInfo(uint32_t uin, uint32_t scaned_uin); // report scaned user
 
 
 
