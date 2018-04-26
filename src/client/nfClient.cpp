@@ -192,7 +192,7 @@ public:
 
 		ClientNetworkMsgLooperHandler::ClientNetworkMsgLooperHandlerInitParam p;
 		p.m_looper = param.m_looper;
-		p.m_svr_ip = "127.0.0.1";
+		p.m_svr_ip_or_name = "127.0.0.1";
 		//p.m_svr_ip = "120.78.58.61";
 		p.m_svr_port = 12306;
 		p.m_cgi_infos = __getCgiInfoMap();
